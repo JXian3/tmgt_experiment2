@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Consumption Experiment</title>
+  <title>Experiment</title>
   <script src="./jspsych/jspsych.js"></script>
   <script src="./jspsych/plugin-html-slider-response.js"></script>
   <script src="./jspsych/plugin-html-button-response.js"></script>
@@ -79,7 +79,7 @@ const categories = {
   food: { stimuli: [
     {
       label:"Cookie 🍪",
-      need:"Emma feels hungry and sees that her favorite bakery made too many cookies and is handing them out for free. <br> She wants <b>4</b> cookies.",
+      need:"Emma feels hungry and sees that her favorite bakery made too many cookies and is handing them out for free. She wants <b>4</b> cookies.",
       outcome:"Emma ended up taking {{N}} cookies. How would Emma feel?",
       emoji:"🍪",
       null:"Suppose that Emma did not get to take any cookies. How would Emma feel?"
@@ -93,7 +93,7 @@ const categories = {
     },
     {
       label:"Healthy fruits 🍊",
-      need:"Nia feels hungry and sees that a farm stand is giving out free oranges. <br> She wants 4 oranges.",
+      need:"Nia feels hungry and sees that a farm stand is giving out free oranges. She wants 4 oranges.",
       outcome:"Nia ended up taking {{N}} oranges home. How would Nia feel?",
       emoji:"🍊",
       null:"Suppose that Nia did not get to take any oranges home. How would Nia feel?"
@@ -208,16 +208,36 @@ function dynamicFollowupPrompt() {
   };
 }
 
+function isScentStimulus(stim) {
+  return stim.label && stim.label.includes("Scent");
+}
+
+function tokenForStim(stim) {
+  if (isScentStimulus(stim)) {
+    // We return an object here, which triggers the image logic in renderToken
+    return { type: "img", src: "img/perfume.png", alt: "perfume" };
+  }
+  return stim.emoji;
+}
+
+function renderToken(token) {
+  if (typeof token === "string") {
+    return `<span class="emoji-char">${token}</span>`;
+  }
+  return `<img src="${token.src}" alt="${token.alt || ""}" class="emoji-img">`;
+}
+
 function buildVisual(nEmoji, emoji, cat, childImg, childName, optimum = 4, isBonus = false){
   const gridSrc = 'img/grid4.png';
   const cropClass = (optimum === 3) ? 'crop3' : '';
+
   return `
     <div class="visual-wrapper ${cat}">
-      <div class="emoji-bubble"><span class="emoji-char">${emoji}</span></div>
+      <div class="emoji-bubble">${renderToken(emoji)}</div>
       <img src="img/${childImg}.png" alt="${childName}" class="child-image">
       <img src="${gridSrc}" class="grid-image ${cropClass}" alt="grid">
       <div class="emoji-track ${optimum === 3 ? 'shift3' : ''}">
-        ${Array.from({ length: nEmoji }).map(() => `<span>${emoji}</span>`).join('')}
+        ${Array.from({ length: nEmoji }).map(() => renderToken(emoji)).join('')}
       </div>
     </div>`;
 }
@@ -517,18 +537,32 @@ shuffledStimuli.forEach(({ cat, stim }) => {
   const needText = (stim.need || '').replace(/X/g, name).replace(/\n/g, '<br>');
 
   // Need page
-  mainTrials.push({
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `<div class="visual-wrapper">\n                 <p>${needText}</p>\n                 <div class="child-wrapper">\n                 <div class="emoji-bubble need-page "><span class="emoji-char">${stim.emoji}</span></div>\n                 <img src="img/${img}.png" alt="${name}" class="child-image">\n                 <div>\n                 ${renderGrid(stim.optimum)}\n               </div>`,
-    choices: ['Continue'],
-    data: { type: 'need_page', category: cat, stimulus_label: stim.label }
-  });
+  const token = tokenForStim(stim);
+
+mainTrials.push({
+  type: jsPsychHtmlButtonResponse,
+  stimulus: `
+    <div class="visual-wrapper">
+      <p>${needText}</p>
+      <div class="child-wrapper">
+        <div class="emoji-bubble need-page">
+          ${renderToken(token)}
+        </div>
+        <img src="img/${img}.png" alt="${name}" class="child-image">
+        <div>
+          ${renderGrid(stim.optimum)}
+        </div>
+      </div>
+    </div>`,
+  choices: ['Continue'],
+  data: { type: 'need_page', category: cat, stimulus_label: stim.label }
+});
 
   // Random amount 0-8
   const amount = Math.floor(Math.random() * 9);
-  const need = needText;
-  const msg = buildMessage(stim, amount);
-  const visual = `<p class="need-text">${need}</p>` + buildVisual(amount, stim.emoji, cat, img, name, stim.optimum);
+const need = needText;
+const msg = buildMessage(stim, amount);
+const visual = `<p class="need-text">${need}</p>` + buildVisual(amount, token, cat, img, name, stim.optimum);
 
   mainTrials.push(
     sliderTrial({
@@ -586,14 +620,6 @@ const FOLLOWUP_TAG = "__followup_target__";
     0
   ];
 }
-
-const attentionIndices = jsPsych.randomization
-  .sampleWithoutReplacement(validIndices, attentionChecks.length)
-  .sort((a, b) => b - a);
-
-attentionIndices.forEach((idx, i) => {
-  mainTrials.splice(idx, 0, attentionChecks[i]);
-});
 
 mainTrials.forEach(t => timeline.push(t));
   

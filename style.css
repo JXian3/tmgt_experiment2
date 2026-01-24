@@ -12,7 +12,7 @@ body{font-family:sans-serif;}
   max-width: 600px;
   width: 120%;
   height: auto;
-  margin: 0 auto 5px;
+  margin-left: 100px;
   display: block;
   }
 
@@ -29,13 +29,18 @@ body{font-family:sans-serif;}
   width: 420px;
   min-height: 100px;
   margin: 10px auto;
-  margin-top: -20px;
+  margin-top: -10px;
 }
 
 .msg-container {
   margin-top: -30px;
   margin-bottom: 10px;
   text-align: center;
+}
+
+.jspsych-html-slider-response {
+  /* Ensure the slider doesn't have a huge gap above it */
+  margin-top: 0px !important; 
 }
 
 .grid-image {
@@ -52,6 +57,19 @@ body{font-family:sans-serif;}
   margin-top: -50px;
   padding-left: 200px;
   width: 100%;
+}
+
+.outcome-text {
+  margin-top: 60px; 
+  
+  margin-bottom: 10px;
+  position: relative; 
+  z-index: 10;
+  display: block;
+}
+
+.visual-wrapper {
+  margin-bottom: 20px;
 }
 
 .emoji-track span{font-size:32px;line-height:1;}
@@ -89,6 +107,25 @@ body{font-family:sans-serif;}
 
 .jspsych-content-wrapper {
   padding-bottom: 0px !important;
+}
+
+/* Makes the PNG behave like a text emoji */
+.emoji-img {
+  height: 1.2em;     
+  width: auto;
+  vertical-align: -0.2em;
+  display: inline-block;
+}
+
+.emoji-track .emoji-img {
+  height: 38px; 
+  transform: translateX(5px);
+  margin-left: -5px;
+}
+
+.emoji-bubble .emoji-img {
+  /* Move right and down */
+  transform: translate(10px, -3px);
 }
 
 /* Reset the slider container position for attention checks */
@@ -140,6 +177,7 @@ body{font-family:sans-serif;}
   line-height: 1.35;
   text-align: center;
 }
+
 
 .original-slider-ticks input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
