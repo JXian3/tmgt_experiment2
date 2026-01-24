@@ -8,13 +8,17 @@ body{font-family:sans-serif;}
 }
 
 /* ===== Feeling scale ===== */
-.feeling-scale{
+.feeling-scale {
   max-width: 600px;
-  width: 120%;
+  width: 100%; /* Changed from 120% to prevent it from spilling out */
   height: auto;
-  margin-left: 100px;
   display: block;
-  }
+  
+  /* This combination centers the image perfectly */
+  margin-left: auto;
+  margin-right: auto;
+
+}
 
 /* ===== Slider labels ===== */
 .slider-labels-custom{display:flex;justify-content:space-between;width:100%;font-weight:bold;margin-top:8px;}
