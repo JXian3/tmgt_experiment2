@@ -486,8 +486,17 @@ function formatQty(amount, stim){
   return `<b>${amount}</b> ${stim.unit}`;
 }
 
+
 function buildMessage(stim, amount){
+  // 1. If amount is 0, use the null string
   if (amount === 0) return stim.null;
+
+  // 2. If amount is 1 AND a singular version exists, use that
+  if (amount === 1 && stim.singular) {
+     return stim.singular.replace('{{N}}', String(amount));
+  }
+
+  // 3. Otherwise (2, 3, 4...), use the standard plural outcome
   return stim.outcome.replace('{{N}}', String(amount));
 }
 
