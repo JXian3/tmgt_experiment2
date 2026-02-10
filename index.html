@@ -252,18 +252,34 @@
 
         var duration = '5 minutes';
         var amount = '$1.25';
-        const participant_id = jsPsych.data.getURLVariable('participantId'); 
-        const filename = `${participant_id}.csv`;
-        const assignment_id = jsPsych.data.getURLVariable('assignmentId');
-        const project_id = jsPsych.data.getURLVariable('projectId');
+        const subject_id = jsPsych.randomization.randomID(10);
+const mturk_pilot_mode = false
+if(mturk_pilot_mode) { 
+    var study_id = 'test';
+    var session_id = 'test';
+    participant_id = 'test_' + String(jsPsych.randomization.randomID(10)) //overwrite the participant id
+} else {
+    participant_id = jsPsych.data.getURLVariable('participantId'); 
+    var assignment_id = jsPsych.data.getURLVariable('assignmentId');
+    var project_id = jsPsych.data.getURLVariable('projectId');
+}
+
+jsPsych.data.addProperties({
+  mturk_participant_id: participant_id,
+  mturk_assignment_id: assignment_id,
+  mturk_project_id: project_id,
+  condition: "Consumption"
+});
+
+const filename = `${participant_id}.csv`;
 
         const save_data = {
-        type: jsPsychPipe,
-        action: "save",
-        experiment_id: "eNkz5Hp6ozWE",
-        filename: filename,
-        data_string: () => jsPsych.data.get().csv()
-    };
+            type: jsPsychPipe,
+            action: "save",
+            experiment_id: "eNkz5Hp6ozWE",
+            filename: filename,
+            data_string: () => jsPsych.data.get().csv()
+        };
 
         var consent = {
             type: jsPsychHtmlButtonResponse,
