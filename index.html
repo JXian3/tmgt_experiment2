@@ -1,20 +1,257 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Redirecting...</title>
-  <script>
-    (function () {
-      const pages = ["condition1.html", "condition2.html"];
-      const randomPage = pages[Math.floor(Math.random() * pages.length)];
-      window.location.replace(randomPage);
-    })();
-  </script>
+  <title>Experiment</title>
+  <script src="./jspsych/jspsych.js"></script>
+  <script src="./jspsych/plugin-html-slider-response.js"></script>
+  <script src="./jspsych/plugin-html-button-response.js"></script>
+  <script src="./jspsych/plugin-survey-html-form.js"></script>
+  <script src="./jspsych/plugin-survey-text.js"></script>
+  <script src="./jspsych/plugin-instructions.js"></script>
+  <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+  <script src="./jspsych/plugin-preload.js"></script>
+  <link href="https://unpkg.com/jspsych@8.2.1/css/jspsych.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .jspsych-html-slider-response { margin-top: -100px !important; }
+    .grid-image.crop3 {
+      -webkit-mask-image: linear-gradient(to right, #000 77%, transparent 77%);
+      mask-image: linear-gradient(to right, #000 77%, transparent 77%);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
+    }
+    .emoji-bubble .emoji-char { display: inline-block; transform: translateX(4px); }
+    .emoji-track { overflow: visible; }
+    .emoji-track.shift3 { transform: translateX(1%); }
+  </style>
 </head>
 <body>
-  <noscript>
-    <p>This study requires JavaScript. Please enable JavaScript and refresh the page.</p>
-  </noscript>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. RANDOMIZE CONDITION
+    const selectedCondition = Math.random() < 0.5 ? "Acquisition" : "Consumption";
+
+    // 2. SHARED HELPER FUNCTIONS
+    function isScentStimulus(stim) { return stim.label && stim.label.includes("Scent"); }
+    function tokenForStim(stim) {
+      if (isScentStimulus(stim)) return { type: "img", src: "img/perfume.png", alt: "perfume" };
+      return stim.emoji;
+    }
+    function renderToken(token) {
+      if (typeof token === "string") return `<span class="emoji-char">${token}</span>`;
+      return `<img src="${token.src}" alt="${token.alt || ""}" class="emoji-img">`;
+    }
+    function renderGrid(optimum){
+      const cropClass = (optimum === 3) ? 'crop3' : '';
+      return `<img src="img/grid4.png" class="grid-image ${cropClass}" alt="empty grid">`;
+    }
+    function buildVisual(nEmoji, emoji, cat, childImg, childName, optimum = 4, isBonus = false){
+      const gridSrc = 'img/grid4.png';
+      const cropClass = (optimum === 3) ? 'crop3' : '';
+      return `<div class="visual-wrapper ${cat}"><div class="emoji-bubble">${renderToken(emoji)}</div><img src="img/${childImg}.png" alt="${childName}" class="child-image"><img src="${gridSrc}" class="grid-image ${cropClass}" alt="grid"><div class="emoji-track ${optimum === 3 ? 'shift3' : ''}">${Array.from({ length: nEmoji }).map(() => renderToken(emoji)).join('')}</div></div>`;
+    }
+    function sliderTrial({ visual, need, msg, cat, label, amt, n, poss, childName }) {
+      return {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `<div class="trial-wrapper">${visual}<p class="outcome-text">${msg}</p><img src="img/feelingScale2.png" class="feeling-scale" alt="scale"></div>`,
+        labels: ["Very Bad","Bad","Neutral","Good","Very Good"],
+        min: 0, max: 100, slider_start: 50, require_movement: false, css_classes: ['original-slider-ticks'],
+        prompt: `<p style="text-align:center; margin-top:-80px; margin-bottom:15px;">Drag the slider to indicate your answer.</p>`,
+        data: { category: cat, stimulus_label: label, trial_number: n, amount: amt, possessive: poss, childName }
+      };
+    }
+    function attentionCheck(direction) {
+      const txt = direction === 'right' ? "Please drag the slider all the way to the right, and click continue." : "Please drag the slider all the way to the left, and click continue.";
+      return {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `<p>${txt}</p><img src="img/feelingScale.png" class="feeling-scale" alt="scale">`,
+        labels: ["Very Bad","Bad","Neutral","Good","Very Good"],
+        min: 0, max: 100, slider_start: 50, require_movement: true,
+        prompt: `<p style="text-align:center; margin-top:0px;">Drag the slider to indicate your answer.</p>`,
+        css_classes: ['attention-check'], 
+        data: { attention_check: true, correct_direction: direction },
+        on_finish: d => { d.correct = (direction === 'right' ? d.response === 100 : d.response === 0); }
+      }
+    }
+    function possessiveFor(name){
+      const female = new Set(['Akira','Nia','Mei','Zuri','Olivia','Akira','Lucy','Jasmine','Maya','Grace']);
+      const male   = new Set(['Hiro','Adam','Eric','Han','Ethan','Amir','Chen','Jack','Jaden','Malik']);
+      if (female.has(name)) return 'her';
+      if (male.has(name)) return 'his';
+      return 'their';
+    }
+
+    const childMap = {
+      'food::Cookie 🍪': { name: 'Emma', img: 'EmmaBubble' },
+      'food::Water 🥤': { name: 'Hiro', img: 'HiroBubble' },
+      'food::Healthy fruits 🍊': { name: 'Nia', img: 'NiaBubble' },
+      'sensory::Light 💡': { name: 'Adam', img: 'AdamBubble' },
+      'sensory::Temperature ♨️': { name: 'Mei', img: 'MeiBubble' },
+      'sensory::Scent 💨': { name: 'Olivia', img: 'OliviaBubble' },
+      'entertainment::Gaming 🎮': { name: 'Eric', img: 'EricBubble' },
+      'entertainment::Watching TV 🎞️': { name: 'Han', img: 'HanBubble' },
+      'entertainment::Reading 📖': { name: 'Zuri', img: 'ZuriBubble' },
+    };
+
+    // 3. RUN THE EXPERIMENT FOR EACH CONDITION
+    if (selectedCondition === "Acquisition") {
+        runAcquisition();
+    } else {
+        runConsumption();
+    }
+
+    /* ================= CONDITION: ACQUISITION ================= */
+    function runAcquisition() {
+        const jsPsych = initJsPsych({
+            override_safe_mode: true,
+            show_progress_bar: true,
+            on_finish: function() { window.location = "https://connect.cloudresearch.com/participant/project/502D9950BA/complete"; }
+        });
+
+        const participant_id = jsPsych.data.getURLVariable('participantId'); 
+        const assignment_id = jsPsych.data.getURLVariable('assignmentId');
+        const project_id = jsPsych.data.getURLVariable('projectId');
+
+        jsPsych.data.addProperties({ mturk_participant_id: participant_id, mturk_assignment_id: assignment_id, mturk_project_id: project_id, condition: "Acquisition" });
+
+        const categories = {
+            food: { stimuli: [
+                { label:"Cookie 🍪", need:"Emma feels hungry and sees that her favorite bakery made too many cookies and is handing them out for free. She wants <b>4</b> cookies.", outcome:"Emma ended up taking <b>{{N}}</b> cookies. How would Emma feel?", singular:"Emma ended up taking <b>{{N}}</b> cookie. How would Emma feel?", emoji:"🍪", null:"Suppose that Emma did not get to take any cookies. How would Emma feel?" },
+                { label:"Water 🥤", need:"Hiro feels thirsty and sees a public water dispenser. He wants <b>4</b> cups of water. ", outcome:"Hiro ended up filling his water bottle with <b>{{N}}</b> cups. How would Hiro feel?", singular:"Hiro ended up filling his water bottle with <b>{{N}}</b> cup. How would Hiro feel?", emoji:"🥤", null:"Suppose that Hiro did not get to fill his water bottle with any water. How would Hiro feel?" },
+                { label:"Healthy fruits 🍊", need:"Nia feels hungry and sees that a farm stand is giving out free oranges. She wants <b>4</b> oranges.", outcome:"Nia ended up taking <b>{{N}}</b> oranges. How would Nia feel?", singular:"Nia ended up taking <b>{{N}}</b> orange. How would Nia feel?", emoji:"🍊", null:"Suppose that Nia did not get to take any oranges. How would Nia feel?" },
+            ]},
+            sensory: { stimuli: [
+                { label:"Light 💡", need:"Adam thinks it's too dark in his house and hears that his friend is moving and giving away household supplies. He wants to make his house brighter by adding <b>4</b> light bulbs.", outcome:"Adam ended up taking <b>{{N}}</b> light bulbs home. How would Adam feel?", singular:"Adam ended up taking <b>{{N}}</b> light bulb home. How would Adam feel?", emoji:"💡", null:"Suppose that Adam did not get to take any light bulbs home. How would Adam feel?" },
+                { label:"Temperature ♨️", need:"Mei's apartment is too cold and she sees that a hardware store is giving away free space heaters. She wants to make her house warmer by adding <b>4</b> heaters.", outcome:"Mei ended up taking <b>{{N}}</b> heaters home. How would Mei feel?", singular:"Mei ended up taking <b>{{N}}</b> heater home. How would Mei feel?", emoji:"♨️", null:"Suppose that Mei did not get to take any heaters home. How would Mei feel?" },
+                { label:"Scent 💨", need:"Olivia is looking to change her style, and sees that a fragrance shop is giving out free samples. Olivia is interested in trying out <b>4</b> perfumes. ", outcome:"Olivia ended up taking <b>{{N}}</b> fragrance samples. How would Olivia feel?", singular:"Olivia ended up taking <b>{{N}}</b> fragrance sample. How would Olivia feel?", emoji:"💨", null:"Suppose that Olivia did not get to take any fragrance samples. How would Olivia feel?" },
+            ]},
+            entertainment: { stimuli: [
+                { label:"Gaming 🎮", need:"Eric is bored over the weekend and hears ahout new game releases. He wants to play <b>4</b> new free games", outcome:"Eric ended up adding <b>{{N}}</b> free games to his library. How would Eric feel?", singular:"Eric ended up adding <b>{{N}}</b> free game to his library. How would Eric feel?", emoji:"🎮", null:"Suppose that he did not get to add any free games to his library. How would Eric feel?" },
+                { label:"Watching TV 🎞️", need:"Han is preparing for a long upcoming train trip. He wants to watch <b>4</b> episodes of a TV show on the train. ", outcome:"Han ended up downloading <b>{{N}}</b> episodes for the trip. How would Han feel?", singular:"Han ended up downloading <b>{{N}}</b> episode for the trip. How would Han feel?", emoji:"🎞️", null:"Suppose that he did not get to download any episodes. How would Han feel?" },
+                { label:"Reading 📖", need:"Zuri is preparing for the weekend and wants something to read. She sees that a neighbor is clearing out her large comic book collection, and she wants <b>4</b> comics.", outcome:"She ended up taking <b>{{N}}</b> comic books home. How would Zuri feel?", singular:"She ended up taking <b>{{N}}</b> comic book home. How would Zuri feel?", emoji:"📖", null:"Suppose that Zuri did not get to take any comic books home. How would Zuri feel?" },
+            ]},
+        };
+
+        const timeline = buildTimeline(jsPsych, categories, "The goal is to test the hypothesis that people intuitively think that the additional satisfaction gained from each extra unit acquired decreases over time.");
+        jsPsych.run(timeline);
+    }
+
+    /* ================= CONDITION: CONSUMPTION ================= */
+    function runConsumption() {
+        const jsPsych = initJsPsych({
+            override_safe_mode: true,
+            show_progress_bar: true,
+            on_finish: function() { window.location = "https://connect.cloudresearch.com/participant/project/502D9950BA/complete"; }
+        });
+
+        const participant_id = jsPsych.data.getURLVariable('participantId'); 
+        const assignment_id = jsPsych.data.getURLVariable('assignmentId');
+        const project_id = jsPsych.data.getURLVariable('projectId');
+
+        jsPsych.data.addProperties({ mturk_participant_id: participant_id, mturk_assignment_id: assignment_id, mturk_project_id: project_id, condition: "Consumption" });
+
+        const categories = {
+            food: { stimuli: [
+                { label:"Cookie 🍪", need:"Emma feels hungry and sees that her favorite bakery made too many cookies and is handing them out for free. She wants <b>4</b> cookies.", outcome:"Emma ended up taking <b>{{N}}</b> cookies, and eating them all. How would Emma feel?", singular:"Emma ended up taking <b>{{N}}</b> cookie, and eating it. How would Emma feel?", emoji:"🍪", null:"Suppose that Emma did not get to take and eat any cookies. How would Emma feel?" },
+                { label:"Water 🥤", need:"Hiro feels thirsty and sees a public water dispenser. He wants <b>4</b> cups of water. ", outcome:"Hiro ended up filling his water bottle with <b>{{N}}</b> cups, and drinking it all. How would Hiro feel?", singular:"Hiro ended up filling his water bottle with <b>{{N}}</b> cup, and drinking it. How would Hiro feel?", emoji:"🥤", null:"Suppose that Hiro did not get to fill his water bottle and drink any water. How would Hiro feel?" },
+                { label:"Healthy fruits 🍊", need:"Nia feels hungry and sees that a farm stand is giving out free oranges. She wants <b>4</b> oranges.", outcome:"Nia ended up taking <b>{{N}}</b> oranges, and eating them all. How would Nia feel?", singular:"Nia ended up taking <b>{{N}}</b> oranges, and eating it. How would Nia feel?", emoji:"🍊", null:"Suppose that Nia did not get to take home and eat any oranges. How would Nia feel?" },
+            ]},
+            sensory: { stimuli: [
+                { label:"Light 💡", need:"Adam thinks it's too dark in his house and hears that his friend is moving and giving away household supplies. He wants to make his house brighter by adding <b>4</b> light bulbs.", outcome:"Adam ended up taking <b>{{N}}</b> light bulbs home, installing all of them in his house, and turning them on. How would Adam feel?", singular:"Adam ended up taking <b>{{N}}</b> light bulb home, installing it in his house, and turning it on. How would Adam feel?", emoji:"💡", null:"Suppose that Adam did not get to take home and install any light bulbs. How would Adam feel?" },
+                { label:"Temperature ♨️", need:"Mei's apartment is too cold and she sees that a hardware store is giving away free space heaters. She wants to make her house warmer by adding 4 heaters.", outcome:"Mei ended up taking <b>{{N}}</b> heaters home, plugging them in, and turning them all on. How would Mei feel?", singular:"Mei ended up taking <b>{{N}}</b> heater home, plugging it in, and turning it on. How would Mei feel?", emoji:"♨️", null:"Suppose that Mei did not get to take home and turn on any heaters. How would Mei feel?" },
+                { label:"Scent 💨", need:"Olivia is looking to change her style, and sees that a fragrance shop is giving out free samples. Olivia is interested in trying out <b>4</b> perfumes. ", outcome:"Olivia ended up taking <b>{{N}}</b> fragrance samples, and spraying herself with all of them. How would Olivia feel?", singular:"Olivia ended up taking <b>{{N}}</b> fragrance sample, and spraying herself with it. How would Olivia feel?", emoji:"💨", null:"Suppose that Olivia did not get to take and spray any fragrance samples. How would Olivia feel?" },
+            ]},
+            entertainment: { stimuli: [
+                { label:"Gaming 🎮", need:"Eric is bored over the weekend and hears ahout new game releases. He wants to play <b>4</b> new free games", outcome:"Eric ended up adding <b>{{N}}</b> free games to his library, and playing them all. How would Eric feel?", singular:"Eric ended up adding <b>{{N}}</b> free game to his library, and playing it. How would Eric feel?", emoji:"🎮", null:"Suppose that he did not get to add to his library and play any free games. How would Eric feel?" },
+                { label:"Watching TV 🎞️", need:"Han is preparing for a long upcoming train trip. He wants to watch <b>4</b> episodes of a TV show on the train. ", outcome:"Han ended up downloading <b>{{N}}</b> episodes for the trip, and watching them all. How would Han feel?", singular:"Han ended up downloading <b>{{N}}</b> episode for the trip, and watching it. How would Han feel?", emoji:"🎞️", null:"Suppose that he did not get to download and watch any episodes for the trip. How would Han feel?" },
+                { label:"Reading 📖", need:"Zuri is preparing for the weekend and wants something to read. She sees that a neighbor is clearing out her large comic book collection, and she wants <b>4</b> comics.", outcome:"She ended up taking <b>{{N}}</b> comic books home, and reading them cover to cover. How would Zuri feel?", singular:"She ended up taking <b>{{N}}</b> comic book home, and reading it. How would Zuri feel?", emoji:"📖", null:"Suppose that Zuri did not get to take home and read any comic books. How would Zuri feel?" },
+            ]},
+        };
+
+        const timeline = buildTimeline(jsPsych, categories, "The goal is to test the hypothesis that people intuitively think that the additional satisfaction gained from each extra unit consumed decreases over time, and may ultimately become negative.");
+        jsPsych.run(timeline);
+    }
+
+    /* ================= TIMELINE ================= */
+    function buildTimeline(jsPsych, categories, debriefText) {
+        var duration = '5 minutes';
+        var amount = '$1.25';
+        const participant_id = jsPsych.data.getURLVariable('participantId'); 
+        const filename = `${participant_id}.csv`;
+
+        var consent = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: '<p><b>Consent Form</b></p> <div style="text-align:left; background-color:lightblue; padding:2vw; max-width:80vw; max-height:60vh; overflow-y:auto;">' +
+                '<p style="text-align:left;"><b>Purpose:</b> The purpose of this study is to understand how people think about others\' feelings.</p>' +
+                '<p style="text-align:left;"><b>Procedures:</b> In this study, you will read sentences, see pictures, and use sliders to answer simple questions about them. This study should take approximately ' + duration + '.</p>' +
+                '</p><p style="text-align:left;"><b>Participation:</b> Participation in this study is voluntary. If you decide to join now, you can change your mind later. </p><p style="text-align:left;"><b>Payment:</b> You will be paid $15.00/hour for participating in this study. Given the estimated duration of ' + duration + ', your payment will amount to ' + amount + '.</p>' +
+                '<p style="text-align:left;"><b>Risks and benefits:</b> There are no risks associated with participating in this study. There are no direct benefits associated with participating in this study. </p><p style="text-align:left;"><b>Use of data by study researchers:</b> The research team led by Shari Liu at JHU will have access to your answers. </p><p style="text-align:left;"><b>Publication of results:</b> The results of the research may be presented at scientific meetings or published in scientific journals. Your individual responses may be published. We will never publish your name, the date that you participated, and any other information that could be used to identify you. </p><p style="text-align:left;"><b>Researcher contact information:</b> This study is run by Dr. Shari Liu at JHU. If you have any questions or concerns about this study, or in the very unlikely event of a research-related injury, please contact sliu199@jhu.edu. </p><p style="text-align:left;"><b>Research rights information:</b> If you have questions about your rights as a research participant or feel that you have not been treated fairly, please call the Homewood Institutional Review Board at Johns Hopkins University at (410) 516-6580. If you have any questions or issues completing the survey, please email Shari Liu at sliu199@jhu.edu. </p> </div>' +
+                '<p> Do you consent to participate? </p>',
+            choices: ['Yes', 'No'],
+            on_finish: function(data) { if (data.response === 1) { jsPsych.abortExperiment('You did not consent to participate.'); } }
+        };
+
+        var transition_expt1 = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: `<div class="intro-screen"><p><b>Welcome to the study!</b></p><p>In the upcoming task, you will read short scenarios in which a character wants a specific amount of items or a specific change.</p><p>After you see what happens, You will use a slider to rate how the character feels in each scenario.</p><p><br>When you're ready to begin, please click "Continue".</p></div>`,
+            choices: ['Continue']
+        };
+
+        const allStimuli = [];
+        Object.keys(categories).forEach(cat => {
+            categories[cat].stimuli.forEach(stim => allStimuli.push({ cat, stim }));
+        });
+
+        const shuffledStimuli = jsPsych.randomization.shuffle(allStimuli);
+        const mainTrials = [];
+
+        shuffledStimuli.forEach(({ cat, stim }) => {
+            const key = `${cat}::${stim.label}`;
+            const child = childMap[key];
+            const amount = Math.floor(Math.random() * 9);
+            const token = tokenForStim(stim);
+            const msg = (amount === 0) ? stim.null : (amount === 1 && stim.singular ? stim.singular.replace('{{N}}', '1') : stim.outcome.replace('{{N}}', amount));
+
+            mainTrials.push({
+                type: jsPsychHtmlButtonResponse,
+                stimulus: `<div class="visual-wrapper"><p>${stim.need}</p><div class="child-wrapper"><div class="emoji-bubble need-page">${renderToken(token)}</div><img src="img/${child.img}.png" class="child-image"><div>${renderGrid(stim.optimum)}</div></div></div>`,
+                choices: ['Continue'],
+                data: { type: 'need_page', category: cat, stimulus_label: stim.label }
+            });
+
+            mainTrials.push(sliderTrial({
+                visual: `<p class="need-text">${stim.need}</p>` + buildVisual(amount, token, cat, child.img, child.name, stim.optimum),
+                msg: msg, cat: cat, label: stim.label, amt: amount, n: 1, poss: possessiveFor(child.name), childName: child.name
+            }));
+        });
+
+        // Attention checks
+        const direction = jsPsych.randomization.sampleWithoutReplacement(['left', 'right'], 1)[0];
+        mainTrials.push(attentionCheck(direction));
+
+        const timeline = [consent, transition_expt1, ...mainTrials];
+
+        timeline.push({
+            type: jsPsychInstructions,
+            pages: ['<p style="font-size: 20px;"><strong>Debrief</strong></p><p><br>Thank you so much for helping us with this study!</p><br><p style = "max-width:800px;"> ' + debriefText + '</p>'],
+            show_clickable_nav: true
+        });
+
+        timeline.push({
+            type: jsPsychPipe,
+            action: "save",
+            experiment_id: "eNkz5Hp6ozWE",
+            filename: filename,
+            data_string: () => jsPsych.data.get().csv()
+        });
+
+        return timeline;
+    }
+  });
+</script>
 </body>
 </html>
