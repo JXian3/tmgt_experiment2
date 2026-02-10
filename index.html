@@ -97,6 +97,14 @@
       'entertainment::Reading 📖': { name: 'Zuri', img: 'ZuriBubble' },
     };
 
+    const save_data = {
+                type: jsPsychPipe,
+                action: "save",
+                experiment_id: "eNkz5Hp6ozWE",
+                filename: filename,
+                data_string: ()=>jsPsych.data.get().csv()
+              };
+
     const feedback_demographics = {
   type: jsPsychSurveyHtmlForm,
   html:
@@ -314,13 +322,7 @@
 
         timeline.push(feedback_demographics);
 
-        timeline.push({
-            type: jsPsychPipe,
-            action: "save",
-            experiment_id: "eNkz5Hp6ozWE",
-            filename: filename,
-            data_string: () => jsPsych.data.get().csv()
-        });
+         timeline.push(save_data)
 
         return timeline;
     }
