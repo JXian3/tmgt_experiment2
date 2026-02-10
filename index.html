@@ -35,7 +35,8 @@
     // 1. RANDOMIZE CONDITION
     const selectedCondition = Math.random() < 0.5 ? "Acquisition" : "Consumption";
 
-    // 2. SHARED HELPER FUNCTIONS
+    // 2. HELPER FUNCTIONS
+    const filename = `${participant_id}.csv`;
     function isScentStimulus(stim) { return stim.label && stim.label.includes("Scent"); }
     function tokenForStim(stim) {
       if (isScentStimulus(stim)) return { type: "img", src: "img/perfume.png", alt: "perfume" };
@@ -103,7 +104,7 @@
                 experiment_id: "eNkz5Hp6ozWE",
                 filename: filename,
                 data_string: ()=>jsPsych.data.get().csv()
-              };
+    };
 
     const feedback_demographics = {
   type: jsPsychSurveyHtmlForm,
@@ -322,7 +323,7 @@
 
         timeline.push(feedback_demographics);
 
-         timeline.push(save_data)
+        timeline.push(save_data)
 
         return timeline;
     }
