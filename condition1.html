@@ -62,6 +62,7 @@ if(mturk_pilot_mode) {
     var session_id = 'test';
     participant_id = 'test_' + String(jsPsych.randomization.randomID(10)) //overwrite the participant id
 } else {
+  
     participant_id = jsPsych.data.getURLVariable('participantId'); 
     var assignment_id = jsPsych.data.getURLVariable('assignmentId');
     var project_id = jsPsych.data.getURLVariable('projectId');

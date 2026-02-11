@@ -250,28 +250,28 @@
     /* ================= TIMELINE ================= */
     function buildTimeline(jsPsych, categories, debriefText) {
 
-        var duration = '5 minutes';
-        var amount = '$1.25';
+        var duration = '3 minutes';
+        var amount = '$0.75';
         const subject_id = jsPsych.randomization.randomID(10);
-const mturk_pilot_mode = false
-if(mturk_pilot_mode) { 
-    var study_id = 'test';
-    var session_id = 'test';
-    participant_id = 'test_' + String(jsPsych.randomization.randomID(10)) //overwrite the participant id
-} else {
-    participant_id = jsPsych.data.getURLVariable('participantId'); 
-    var assignment_id = jsPsych.data.getURLVariable('assignmentId');
-    var project_id = jsPsych.data.getURLVariable('projectId');
-}
+        const mturk_pilot_mode = false
+        if(mturk_pilot_mode) { 
+            var study_id = 'test';
+            var session_id = 'test';
+            participant_id = 'test_' + String(jsPsych.randomization.randomID(10)) //overwrite the participant id
+        } else {
+            participant_id = jsPsych.data.getURLVariable('participantId') || 'no_id_found';
+            var assignment_id = jsPsych.data.getURLVariable('assignmentId');
+            var project_id = jsPsych.data.getURLVariable('projectId');
+        }
 
-jsPsych.data.addProperties({
-  mturk_participant_id: participant_id,
-  mturk_assignment_id: assignment_id,
-  mturk_project_id: project_id,
-  condition: "Consumption"
-});
+        jsPsych.data.addProperties({
+            mturk_participant_id: participant_id,
+            mturk_assignment_id: assignment_id,
+            mturk_project_id: project_id,
+        condition: "Consumption"
+        });
 
-const filename = `${participant_id}.csv`;
+        const filename = `${participant_id}.csv`;
 
         const save_data = {
             type: jsPsychPipe,
