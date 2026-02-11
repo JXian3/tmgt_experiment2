@@ -264,13 +264,6 @@
             var project_id = jsPsych.data.getURLVariable('projectId');
         }
 
-        jsPsych.data.addProperties({
-            mturk_participant_id: participant_id,
-            mturk_assignment_id: assignment_id,
-            mturk_project_id: project_id,
-        condition: "Consumption"
-        });
-
         const filename = `${participant_id}.csv`;
 
         var consent = {
