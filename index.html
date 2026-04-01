@@ -89,12 +89,8 @@
       'food::Cookie 🍪': { name: 'Emma', img: 'EmmaBubble' },
       'food::Water 🥤': { name: 'Hiro', img: 'HiroBubble' },
       'food::Healthy fruits 🍊': { name: 'Nia', img: 'NiaBubble' },
-      'sensory::Light 💡': { name: 'Adam', img: 'AdamBubble' },
-      'sensory::Temperature ♨️': { name: 'Mei', img: 'MeiBubble' },
-      'sensory::Scent 💨': { name: 'Olivia', img: 'OliviaBubble' },
-      'entertainment::Gaming 🎮': { name: 'Eric', img: 'EricBubble' },
-      'entertainment::Watching TV 🎞️': { name: 'Han', img: 'HanBubble' },
-      'entertainment::Reading 📖': { name: 'Zuri', img: 'ZuriBubble' },
+      'food::Candy 🍬': { name: 'Adam', img: 'AdamBubble' },
+      'food::Ice Cream 🍦': { name: 'Zuri', img: 'ZuriBubble' },
     };
 
     const feedback_demographics = {
@@ -191,11 +187,11 @@
         
         const categories = {
             food: { stimuli: [
-                { label:"Cookie 🍪", need:"Adam feels hungry and wants to eat 4 cookies.", outcome: "Suppose that Adam put <b>{{N}}</b> cookies on his plate. How would Adam feel?", singular: "Suppose that Adam put <b>{{N}}</b> cookie on his plate. How would Adam feel?", emoji:"🍪", null:"Suppose that Adam did not get to put any cookies on his plate. How would Adam feel?", },
+                { label:"Cookie 🍪", need:"Adam feels hungry and wants to eat <b>4</b> cookies.", outcome: "Suppose that Adam put <b>{{N}}</b> cookies on his plate. How would Adam feel?", singular: "Suppose that Adam put <b>{{N}}</b> cookie on his plate. How would Adam feel?", emoji:"🍪", null:"Suppose that Adam did not get to put any cookies on his plate. How would Adam feel?", },
                 { label:"Water 🥤", need:"Zuri feels thirsty and wants to drink 4 cups of water.", outcome:"Suppose that Zuri filled her water bottle with <b>{{N}}</b> cups of water. How would Zuri feel?", singular:"Suppose that Zuri filled her water bottle with <b>{{N}}</b> cup of water. How would Zuri feel?", emoji:"🥤", null:"Suppose that Zuri did not get to fill her water bottle with any water. How would Zuri feel?" },
-                { label:"Candy 🍬", need:"Chen feels hungry and wants to eat 4 candies.", outcome:"Suppose that Chen put <b>{{N}}</b> candies in his pocket. How would Chen feel?", singular: "Suppose that Chen put <b>{{N}}</b> candy in his pocket. How would Chen feel?",  emoji:"🍬", null:"Suppose that Chen did not get to put any candies in his pocket. How would Chen feel?" },
+                { label:"Candy 🍬", need:"Chen feels hungry and wants to eat <b>4</b> candies.", outcome:"Suppose that Chen put <b>{{N}}</b> candies in his pocket. How would Chen feel?", singular: "Suppose that Chen put <b>{{N}}</b> candy in his pocket. How would Chen feel?",  emoji:"🍬", null:"Suppose that Chen did not get to put any candies in his pocket. How would Chen feel?" },
                 { label:"Healthy fruits 🍊", need:"Nia feels hungry and wants to eat <b>4</b> oranges.", outcome:"Suppose that Nia ate <b>{{N}}</b> oranges. How would Nia feel?", singular:"Suppose that Nia ate <b>{{N}}</b> orange. How would Nia feel?", emoji:"🍊", null:"Suppose that Nia did not get to eat any oranges. How would Nia feel?" },
-                { label:"Ice Cream 🍦", need:"Nia feels hungry and wants to eat 4 scoops of ice cream.", outcome:"Suppose that Nia ate <b>{{N}}</b> scoops of ice cream. How would Nia feel?", singular:"Suppose that Nia ate 1 scoop of ice cream. How would Nia feel?", emoji:"🍊", null:"Suppose that Nia did not get to eat any ice creams. How would Nia feel?" }, 
+                { label:"Ice Cream 🍦", need:"Nia feels hungry and wants to eat <b>4</b> scoops of ice cream.", outcome:"Suppose that Nia ate <b>{{N}}</b> scoops of ice cream. How would Nia feel?", singular:"Suppose that Nia ate 1 scoop of ice cream. How would Nia feel?", emoji:"🍊", null:"Suppose that Nia did not get to eat any ice creams. How would Nia feel?" }, 
             ]},
         };
 
@@ -219,11 +215,11 @@
 
         const categories = {
             food: { stimuli: [
-                { label:"Cookie 🍪", need:"Adam feels hungry and wants to eat 4 cookies.", outcome: "Suppose that Adam ate <b>{{N}}</b> cookies. How would Adam feel?", singular: "Suppose that Adam ate <b>{{N}}</b> cookie. How would Adam feel?", emoji:"🍪", null:"Suppose that Adam did not get to eat any cookies. How would Adam feel?", },
-                { label:"Water 🥤", need:"Zuri feels thirsty and wants to drink 4 cups of water.", outcome:"Suppose that Zuri drank <b>{{N}}</b> cups of water. How would Zuri feel?", singular:"Suppose that Zuri drank <b>{{N}}</b> cup of water. How would Zuri feel?", emoji:"🥤", null:"Suppose that Zuri did not get to drink any water. How would Zuri feel?" },
-                { label:"Candy 🍬", need:"Chen feels hungry and wants to eat 4 candies.", outcome:"Suppose that Chen ate <b>{{N}}</b>  candies. How would Chen feel?", singular: "Suppose that Chen ate <b>{{N}}</b> candy. How would Chen feel?",  emoji:"🍬", null:"Suppose that Chen did not get to eat any candies. How would Chen feel?" },
+                { label:"Cookie 🍪", need:"Adam feels hungry and wants to eat <b>4</b> cookies.", outcome: "Suppose that Adam ate <b>{{N}}</b> cookies. How would Adam feel?", singular: "Suppose that Adam ate <b>{{N}}</b> cookie. How would Adam feel?", emoji:"🍪", null:"Suppose that Adam did not get to eat any cookies. How would Adam feel?", },
+                { label:"Water 🥤", need:"Zuri feels thirsty and wants to drink <b>4</b> cups of water.", outcome:"Suppose that Zuri drank <b>{{N}}</b> cups of water. How would Zuri feel?", singular:"Suppose that Zuri drank <b>{{N}}</b> cup of water. How would Zuri feel?", emoji:"🥤", null:"Suppose that Zuri did not get to drink any water. How would Zuri feel?" },
+                { label:"Candy 🍬", need:"Chen feels hungry and wants to eat <b>4</b> candies.", outcome:"Suppose that Chen ate <b>{{N}}</b>  candies. How would Chen feel?", singular: "Suppose that Chen ate <b>{{N}}</b> candy. How would Chen feel?",  emoji:"🍬", null:"Suppose that Chen did not get to eat any candies. How would Chen feel?" },
                 { label:"Healthy fruits 🍊", need:"Nia feels hungry and wants to eat <b>4</b> oranges.", outcome:"Suppose that Nia ate <b>{{N}}</b> oranges. How would Nia feel?", singular:"Suppose that Nia ate <b>{{N}}</b> orange. How would Nia feel?", emoji:"🍊", null:"Suppose that Nia did not get to eat any oranges. How would Nia feel?" },
-                { label:"Ice Cream 🍦", need:"Nia feels hungry and wants to eat 4 scoops of ice cream.", outcome:"Suppose that Nia ate <b>{{N}}</b> scoops of ice cream. How would Nia feel?", singular:"Suppose that Nia ate 1 scoop of ice cream. How would Nia feel?", emoji:"🍊", null:"Suppose that Nia did not get to eat any ice creams. How would Nia feel?" }, 
+                { label:"Ice Cream 🍦", need:"Nia feels hungry and wants to eat <b>4</b> scoops of ice cream.", outcome:"Suppose that Nia ate <b>{{N}}</b> scoops of ice cream. How would Nia feel?", singular:"Suppose that Nia ate 1 scoop of ice cream. How would Nia feel?", emoji:"🍊", null:"Suppose that Nia did not get to eat any ice creams. How would Nia feel?" }, 
             ]},
         };
 
